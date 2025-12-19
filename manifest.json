@@ -1,0 +1,23 @@
+{
+  "name": "Ping",
+  "description": "Replies \"pong\" when /ping is invoked.",
+  "ubiquity:listeners": ["issue_comment.created"],
+  "skipBotEvents": true,
+  "commands": {
+    "ping": {
+      "ubiquity:example": "/ping",
+      "description": "Replies with pong.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  "configuration": {
+    "default": {},
+    "type": "object",
+    "properties": {}
+  },
+  "homepage_url": "https://github.com/ubiquity-os-marketplace/command-ping",
+  "short_name": "ubiquity-os-marketplace/command-ping@development"
+}
