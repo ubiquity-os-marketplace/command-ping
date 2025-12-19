@@ -10,6 +10,28 @@ function normalizeCommand(command) {
     .toLowerCase();
 }
 
+function extractCommandName(raw) {
+  if (raw == null) return '';
+
+  if (typeof raw === 'string') {
+    const text = raw.trim();
+    if (!text) return '';
+
+    const parsed = tryJsonParse(text);
+    if (parsed.ok && parsed.value && typeof parsed.value === 'object' && typeof parsed.value.name === 'string') {
+      return normalizeCommand(parsed.value.name);
+    }
+
+    return normalizeCommand(text);
+  }
+
+  if (typeof raw === 'object' && typeof raw.name === 'string') {
+    return normalizeCommand(raw.name);
+  }
+
+  return normalizeCommand(String(raw));
+}
+
 function tryJsonParse(text) {
   try {
     return { ok: true, value: JSON.parse(text) };
@@ -92,17 +114,16 @@ async function main() {
   const event = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
   const inputs = event.inputs || {};
 
-  const normalizedCommand = normalizeCommand(inputs.command);
   const authToken = inputs.authToken;
   if (!authToken) {
     throw new Error('Missing inputs.authToken');
   }
 
   const payload = parsePossiblyCompressedJson(inputs.eventPayload, 'inputs.eventPayload');
+  const normalizedCommand = extractCommandName(inputs.command);
+  const commentBody = String(payload?.comment?.body || '');
 
-  const isPing =
-    normalizedCommand === 'ping' ||
-    (!normalizedCommand && /(^|\s)\/ping(\s|$)/i.test(String(payload?.comment?.body || '')));
+  const isPing = normalizedCommand === 'ping' || /(^|\s)\/ping(\s|$)/i.test(commentBody);
 
   if (!isPing) {
     console.log('Not a /ping invocation; exiting.');
